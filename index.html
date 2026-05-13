@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ASD Tournament Check-in</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SheetJS for Excel parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen active">
+        <div class="login-card glass">
+            <div class="logo">
+                <i class="fa-solid fa-table-tennis-paddle-ball"></i>
+            </div>
+            <h1>ASD Check-in</h1>
+            <p>Accesso Staff</p>
+            <div class="input-group">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="password-input" placeholder="Inserisci password...">
+            </div>
+            <button id="login-btn" class="btn primary-btn">Accedi</button>
+            <p id="login-error" class="error-text hidden">Password errata!</p>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard-screen" class="screen hidden">
+        <header class="glass-header">
+            <div class="header-top">
+                <h2>Check-in Torneo</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button id="upload-excel-btn" class="icon-btn" title="Carica Excel">
+                        <i class="fa-solid fa-file-excel"></i>
+                    </button>
+                    <button id="settings-btn" class="icon-btn" title="Impostazioni Cloud & IA">
+                        <i class="fa-solid fa-gear"></i>
+                    </button>
+                    <button id="export-btn" class="icon-btn" title="Esporta Dati">
+                        <i class="fa-solid fa-download"></i>
+                    </button>
+                    <input type="file" id="excel-file-input" accept=".xlsx, .xls" hidden>
+                </div>
+            </div>
+            <div class="search-bar">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" id="search-input" placeholder="Cerca giocatore...">
+            </div>
+            <div class="stats-bar">
+                <span class="stat-pill"><i class="fa-solid fa-users"></i> <b id="stat-total-players">0</b></span>
+                <span class="stat-pill cash"><i class="fa-solid fa-money-bill-wave"></i> <b id="stat-cash">0€</b></span>
+                <span class="stat-pill pos"><i class="fa-solid fa-credit-card"></i> <b id="stat-pos">0€</b></span>
+            </div>
+        </header>
+
+        <main id="players-list" class="players-container">
+            <!-- Player cards will be injected here -->
+            <div class="empty-state">
+                <i class="fa-solid fa-file-arrow-up"></i>
+                <p>Nessun dato presente. Carica il file Excel delle iscrizioni.</p>
+            </div>
+        </main>
+
+        <!-- Floating Chat Button -->
+        <button id="chat-fab" class="fab glass">
+            <i class="fa-solid fa-robot"></i>
+        </button>
+
+        <!-- Chat Panel -->
+        <div id="chat-panel" class="chat-panel hidden glass">
+            <div class="chat-header">
+                <h3><i class="fa-solid fa-robot"></i> Assistente IA</h3>
+                <button id="close-chat-btn" class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="message ai">Ciao! Chiedimi informazioni sui giocatori o sugli incassi.</div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chat-input" placeholder="Es: Chi manca all'appello?">
+                <button id="send-chat-btn" class="icon-btn primary-text"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="modal-card glass">
+            <div class="modal-header">
+                <h3>Impostazioni Avanzate</h3>
+                <button id="close-settings-btn-top" class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-section">
+                    <h4>Intelligenza Artificiale (Google Gemini)</h4>
+                    <p class="settings-desc">Inserisci la tua API Key di Google AI Studio per attivare la chat intelligente.</p>
+                    <input type="password" id="openai-key-input" placeholder="AIzaSy..." class="settings-input">
+                </div>
+                <div class="settings-section">
+                    <h4>Sincronizzazione Cloud (Realtime)</h4>
+                    <p class="settings-desc">Inserisci l'URL del tuo Firebase Realtime Database per sincronizzare i dati tra tutti i dispositivi.</p>
+                    <input type="text" id="firebase-url-input" placeholder="https://your-project.firebasedatabase.app/" class="settings-input">
+                </div>
+                <div class="settings-section">
+                    <h4>Gestione Dati Locali</h4>
+                    <button id="clear-data-btn" class="btn danger-btn" style="width: 100%;"><i class="fa-solid fa-trash"></i> Pulisci Tutti i Dati</button>
+                </div>
+            </div>
+            <div style="padding: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; gap: 10px;">
+                <button id="save-api-btn" class="btn primary-btn" style="flex: 1;">Salva Impostazioni</button>
+                <button id="close-settings-btn" class="btn" style="flex: 1; background: rgba(255, 255, 255, 0.1); color: white;">Chiudi</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
