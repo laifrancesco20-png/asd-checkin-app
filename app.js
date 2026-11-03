@@ -51,9 +51,22 @@ function init() {
         renderPlayers();
     }
 
+    // La chiave Gemini non va mai salvata nel database: chiunque conosca l'URL potrebbe leggerla.
+    // Rimuove la copia che le versioni precedenti scrivevano in /config.json.
+    removeLegacyCloudConfig();
+
     // Start Cloud Sync with Default or Custom URL
     syncFromCloud();
     setInterval(syncFromCloud, 5000); // Polling every 5 seconds
+}
+
+async function removeLegacyCloudConfig() {
+    const url = localStorage.getItem('firebaseUrl') || DEFAULT_FIREBASE_URL;
+    if(!url) return;
+    try {
+        const cleanUrl = url.endsWith('/') ? url.slice(0, -1) : url;
+        await fetch(`${cleanUrl}/config.json`, { method: 'DELETE' });
+    } catch(e) { console.error("Remove Legacy Config Error:", e); }
 }
 
 async function syncToCloud() {
@@ -69,14 +82,6 @@ async function syncToCloud() {
             body: JSON.stringify(playersData)
         });
 
-        // Sync API Key Config (so all devices get it)
-        const apiKey = localStorage.getItem('openaiApiKey');
-        if(apiKey) {
-            await fetch(`${cleanUrl}/config.json`, {
-                method: 'PUT',
-                body: JSON.stringify({ apiKey: apiKey })
-            });
-        }
     } catch(e) { console.error("Sync To Cloud Error:", e); }
 }
 
@@ -95,13 +100,6 @@ async function syncFromCloud() {
             renderPlayers(searchInput.value);
         }
 
-        // 2. Sync Config (API Key)
-        const configResp = await fetch(`${cleanUrl}/config.json`);
-        const config = await configResp.json();
-        if(config && config.apiKey && !localStorage.getItem('openaiApiKey')) {
-            localStorage.setItem('openaiApiKey', config.apiKey);
-            console.log("API Key sincronizzata dal cloud!");
-        }
     } catch(e) { console.error("Sync From Cloud Error:", e); }
 }
 
